@@ -1,57 +1,58 @@
-// Sticky Navbar Effect
+﻿// ── Sticky Navbar ───────────────────────────────────────────────────
 window.addEventListener('scroll', () => {
   const navbar = document.getElementById('navbar');
-  if (window.scrollY > 50) {
-    navbar.classList.add('scrolled');
-  } else {
-    navbar.classList.remove('scrolled');
-  }
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
 });
 
-// Active Navigation Highlight
-const sections = document.querySelectorAll('section');
-const navLinks = document.querySelectorAll('.nav-links a');
+// ── Active Nav Highlighting ─────────────────────────────────────────
+const sections = document.querySelectorAll('main section, header');
+const navLinks  = document.querySelectorAll('.nav-links a[href^="#"]');
 
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach(section => {
-    const sectionTop = section.offsetTop;
-    if (pageYOffset >= sectionTop - 100) {
-      current = section.getAttribute('id');
+const observerOptions = {
+  root: null,
+  rootMargin: '-40% 0px -55% 0px',
+  threshold: 0
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+      });
     }
   });
+}, observerOptions);
 
-  navLinks.forEach(link => {
-    link.classList.remove('active');
-    if (link.getAttribute('href') === `#${current}`) {
-      link.classList.add('active');
-    }
-  });
-});
+sections.forEach(section => { if (section.id) observer.observe(section); });
 
-// Form Submission Simulation
+// ── Form Submission ─────────────────────────────────────────────────
 const contactForm = document.getElementById('contact-form');
-if (contactForm) {
+const submitBtn   = document.getElementById('submit-btn');
+
+if (contactForm && submitBtn) {
   contactForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const btn = contactForm.querySelector('button[type="submit"]');
-    const originalText = btn.textContent;
-    btn.textContent = 'Submitting...';
-    btn.disabled = true;
-    
-    // Simulate API call
+
+    const originalHTML = submitBtn.innerHTML;
+    submitBtn.innerHTML    = 'Submitting&hellip;';
+    submitBtn.disabled     = true;
+    submitBtn.style.opacity = '0.75';
+
     setTimeout(() => {
-      btn.textContent = 'Inquiry Sent Successfully';
-      btn.style.backgroundColor = '#10b981'; // Success green
-      btn.style.color = '#fff';
+      submitBtn.innerHTML         = '&#10003; Inquiry Sent — We&rsquo;ll respond within 2 hours.';
+      submitBtn.style.background  = 'linear-gradient(135deg, #10b981, #059669)';
+      submitBtn.style.boxShadow   = '0 4px 14px rgba(16, 185, 129, 0.35)';
+      submitBtn.style.opacity     = '1';
       contactForm.reset();
-      
+
       setTimeout(() => {
-        btn.textContent = originalText;
-        btn.style.backgroundColor = '';
-        btn.style.color = '';
-        btn.disabled = false;
-      }, 3000);
+        submitBtn.innerHTML        = originalHTML;
+        submitBtn.style.background = '';
+        submitBtn.style.boxShadow  = '';
+        submitBtn.disabled         = false;
+      }, 4000);
     }, 1500);
   });
 }
